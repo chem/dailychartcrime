@@ -99,9 +99,8 @@ function renderChart(data) {
   else if (absR > 0.4) strength = 'moderately';
 
   const title = data.series.title;
-  const postDateStr = data.generatedAt
-    ? new Date(data.generatedAt).toISOString().slice(0, 10)
-    : new Date().toISOString().slice(0, 10);
+  const postDateStr = data.generatedDate
+    || (data.generatedAt ? new Date(data.generatedAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10));
 
   setText('post-date', fmtDate(postDateStr).toUpperCase());
   setText('post-headline', `${title} is ${strength} correlated with the S&P 500`);
