@@ -354,6 +354,7 @@ async function main() {
     rank: todayPick.rank,
     totalSeries: todayPick.totalSeries,
     generatedAt: new Date().toISOString(),
+    generatedDate: new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }),
   };
 
   // 6. Write chart data to file cache and record usage
