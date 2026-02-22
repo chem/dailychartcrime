@@ -1,0 +1,17 @@
+# Copy this file to .dev.vars and fill in your values.
+# .dev.vars is gitignored and never committed.
+#
+# Usage: npm run dev  (reads this file automatically via scripts/dev.mjs)
+# Or:    FRED_API_KEY=<key> node scripts/generate.mjs
+
+# Required: get a free key at https://fred.stlouisfed.org/docs/api/api_key.html
+FRED_API_KEY=your_key_here
+
+# Optional runtime guards (shown with defaults)
+# FRED_MIN_REQUEST_INTERVAL_MS=1000
+# FRED_MAX_RETRIES=6
+# FRED_MAX_BACKOFF_MS=60000
+# FRED_REQUEST_TIMEOUT_MS=30000
+# EXTERNAL_FETCH_TIMEOUT_MS=30000
+# MIN_SERIES_SUCCESS_RATIO=0.9
+# DEBUG=1

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Chart Crime</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+          integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
+          crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+      border-radius: 0 !important;
+    }
+
+    body {
+      font-family: 'Nunito Sans', sans-serif;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #000;
+      background: #fff;
+    }
+
+    a { color: #007d55; text-decoration: none; }
+    a:hover { color: #233e3c; text-decoration: underline; }
+
+    /* ── Navigation ─────────────────────────────── */
+    .nav {
+      background: #fff;
+      border-bottom: 1px solid #e7e8ea;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #000;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      font-size: 13px;
+      font-weight: 400;
+      color: #333;
+    }
+
+    .nav-links a { color: #333; }
+    .nav-links a:hover { color: #007d55; text-decoration: none; }
+
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .nav-btn {
+      padding: 6px 16px;
+      background: #007d55;
+      color: #fff !important;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      transition: background 0.3s;
+    }
+
+    .nav-btn:hover { background: #233e3c; text-decoration: none !important; }
+
+    /* ── Stale Data Banner ──────────────────────── */
+    .stale-banner {
+      display: none;
+      background: #fffbe6;
+      border-bottom: 2px solid #f0c040;
+      padding: 10px 40px;
+      font-size: 13px;
+      color: #555;
+      text-align: center;
+    }
+    .stale-banner.visible { display: block; }
+
+    /* ── Hero ───────────────────────────────────── */
+    .hero {
+      padding: 60px 40px 50px;
+      border-bottom: 1px solid #e7e8ea;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .hero-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #007d55;
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: 52px;
+      font-weight: 300;
+      line-height: 1.1;
+      color: #000;
+      margin-bottom: 24px;
+      max-width: 800px;
+    }
+
+    .hero-meta {
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* ── CTA Strip ──────────────────────────────── */
+    .cta-strip {
+      background: #007d55;
+      color: #fff;
+      text-align: center;
+      padding: 18px 40px;
+      font-size: 15px;
+    }
+
+    .cta-strip a {
+      display: inline-block;
+      margin-left: 16px;
+      padding: 8px 24px;
+      background: #fff;
+      color: #007d55 !important;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .cta-strip a:hover {
+      background: #233e3c;
+      color: #fff !important;
+      text-decoration: none !important;
+    }
+
+    /* ── Content ────────────────────────────────── */
+    .content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* ── Post ───────────────────────────────────── */
+    .post {
+      padding: 48px 0 40px;
+    }
+
+    .post-date {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 16px;
+    }
+
+    .post-headline {
+      font-size: 32px;
+      font-weight: 300;
+      line-height: 1.25;
+      color: #000;
+      margin-bottom: 24px;
+      max-width: 780px;
+    }
+
+    /* ── Byline ─────────────────────────────────── */
+    .byline {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .byline-avatar {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .byline-text .author-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #000;
+    }
+
+    .byline-text .author-role {
+      font-size: 13px;
+      font-weight: 300;
+      color: #555;
+    }
+
+    /* ── Editorial prose ────────────────────────── */
+    .editorial {
+      font-size: 16px;
+      line-height: 1.75;
+      color: #000;
+      margin-bottom: 36px;
+      max-width: 760px;
+    }
+
+    /* ── Chart ──────────────────────────────────── */
+    .chart-wrap {
+      width: 100%;
+      margin-bottom: 0;
+    }
+
+    .chart-wrap canvas {
+      display: block;
+      width: 100% !important;
+      height: 440px !important;
+    }
+
+    /* Custom HTML legend — lives outside the canvas so it wraps freely */
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 24px;
+      padding: 12px 0 16px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #000;
+    }
+
+    .chart-legend-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .chart-legend-swatch {
+      flex-shrink: 0;
+      width: 30px;
+      height: 2px;
+      margin-top: 8px; /* vertically centres the line against the text cap-height */
+    }
+
+    .chart-source {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .download-link {
+      display: inline-block;
+      font-size: 13px;
+      color: #007d55;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    /* ── Correlation badge ──────────────────────── */
+    .corr-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid;
+      margin-bottom: 8px;
+    }
+
+    .corr-positive { color: #007d55; border-color: #007d55; }
+    .corr-negative { color: #c62828; border-color: #c62828; }
+
+    .corr-rank {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 0;
+    }
+
+    /* ── Divider ────────────────────────────────── */
+    .divider {
+      text-align: center;
+      font-size: 18px;
+      color: #aaa;
+      letter-spacing: 12px;
+      padding: 40px 0;
+      border-top: 1px solid #e7e8ea;
+    }
+
+    /* ── Disclaimer ─────────────────────────────── */
+    .disclaimer {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.7;
+      padding: 32px 0 40px;
+    }
+
+    .disclaimer strong { font-weight: 600; color: #555; }
+
+    /* ── Footer ─────────────────────────────────── */
+    footer {
+      background: #54585a;
+      color: #fff;
+      padding: 36px 40px;
+    }
+
+    .footer-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .footer-inner a { color: #fff; opacity: 0.8; }
+    .footer-inner a:hover { opacity: 1; text-decoration: underline; }
+
+    /* ── Rigged popup ───────────────────────────── */
+    .rigged-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .rigged-overlay.open { display: flex; }
+
+    .rigged-box {
+      background: #fff;
+      border: 3px solid #000;
+      padding: 52px 72px;
+      text-align: center;
+      cursor: default;
+      user-select: none;
+    }
+
+    .rigged-word {
+      font-size: 72px;
+      font-weight: 700;
+      letter-spacing: 14px;
+      color: #c62828;
+      text-transform: uppercase;
+      display: inline-block;
+      transform: rotate(-8deg);
+      line-height: 1;
+    }
+
+    .rigged-dismiss {
+      display: block;
+      margin-top: 20px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    /* ── Responsive ─────────────────────────────── */
+    @media (max-width: 767px) {
+      /* Nav: two-row layout — logo+button on top, links below */
+      .nav {
+        padding: 0 20px;
+        height: auto;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .nav-logo { order: 1; padding: 14px 0; flex: 1; }
+      .nav-actions { order: 2; }
+      .nav-links {
+        display: flex;
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        gap: 20px;
+        font-size: 11px;
+        letter-spacing: 0;
+        padding: 8px 0 10px;
+        border-top: 1px solid #e7e8ea;
+      }
+
+      .hero { padding: 28px 20px 24px; }
+      .hero-title { font-size: 26px; }
+
+      .cta-strip { font-size: 14px; padding: 16px 20px; }
+      .cta-strip a { display: block; margin: 12px auto 0; width: fit-content; }
+
+      .content { padding: 0 20px; }
+      .post-headline { font-size: 20px; }
+
+      .chart-wrap canvas { height: 280px !important; }
+
+      footer { padding: 28px 20px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+  </style>
+</head>
+<body data-chart-url="./chart-data.json">
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-logo">Daily Chart Crime</div>
+    <div class="nav-links">
+      <a href="#" class="rigged-trigger">Markets</a>
+      <a href="#" class="rigged-trigger">Rates</a>
+      <a href="#" class="rigged-trigger">Crime Beat</a>
+      <a href="#" class="rigged-trigger">Methodology</a>
+    </div>
+    <div class="nav-actions">
+      <a href="#" class="nav-btn">Subscribe Never</a>
+    </div>
+  </nav>
+
+  <!-- Stale data banner (shown by JS when data is more than 1 day old) -->
+  <div class="stale-banner" id="stale-banner"></div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-label">The Daily Correlation &mdash; Est. 2026</div>
+    <h1 class="hero-title">Today&rsquo;s Spurious Correlation</h1>
+    <div class="hero-meta" id="hero-meta">Rigorous analysis of coincidences, produced daily by algorithm.</div>
+  </div>
+
+  <!-- Subscribe CTA -->
+  <div class="cta-strip">
+    Want spurious correlations delivered to your inbox?
+    <a href="#">Subscribe Never</a>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="post">
+
+      <div class="post-date" id="post-date"></div>
+      <h2 class="post-headline" id="post-headline"></h2>
+
+      <!-- Author byline -->
+      <div class="byline">
+        <div class="byline-avatar">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" fill="#e0e0e0"/>
+            <circle cx="24" cy="19" r="9" fill="#999"/>
+            <ellipse cx="24" cy="40" rx="15" ry="10" fill="#999"/>
+          </svg>
+        </div>
+        <div class="byline-text">
+          <div class="author-name">The Algorithm</div>
+          <div class="author-role">Chief Econometric Officer &bull; Daily Chart Crime</div>
+        </div>
+      </div>
+
+      <p class="editorial" id="editorial">Loading correlation data&hellip;</p>
+
+      <div class="chart-wrap" id="chart-wrap">
+        <canvas id="chart"></canvas>
+        <div class="chart-legend" id="chart-legend"></div>
+      </div>
+
+      <p class="chart-source" id="chart-source"></p>
+      <a href="#" class="download-link" id="download-link">Download chart (PNG)</a>
+
+      <div>
+        <span class="corr-badge" id="corr-badge"></span>
+      </div>
+      <p class="corr-rank" id="corr-rank"></p>
+
+    </div>
+
+    <div class="divider">* &nbsp;&nbsp; * &nbsp;&nbsp; *</div>
+
+    <div class="disclaimer">
+      <strong>Forward-Looking Disclaimer:</strong> The correlations shown herein should not be construed as investment advice, financial guidance, or evidence that our algorithm understands statistics. Correlation is not causation. Past spuriousness does not guarantee future spuriousness. The Algorithm is not a licensed financial advisor, registered investment analyst, or, frankly, a particularly sophisticated system. All data sourced from publicly available government databases. This is satire. Please do not make financial decisions based on this chart.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <span>Daily Chart Crime &bull; A parody of institutional financial research</span>
+      <span>
+        Data: <a href="https://fred.stlouisfed.org/" target="_blank" rel="noopener">FRED</a> &bull;
+        <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> &bull;
+        <a href="https://www.mediawiki.org/wiki/API" target="_blank" rel="noopener">Wikimedia</a>
+      </span>
+      <span>&copy; 2026 The Algorithm</span>
+    </div>
+  </footer>
+
+  <!-- Rigged popup -->
+  <div class="rigged-overlay" id="rigged-overlay">
+    <div class="rigged-box">
+      <span class="rigged-word">Rigged</span>
+      <span class="rigged-dismiss">click anywhere to dismiss</span>
+    </div>
+  </div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
